@@ -9,16 +9,13 @@ const CHAINS = {
     name: "Rise",
     rpc: "https://testnet.riselabs.xyz",
     explorer: "https://explorer.testnet.riselabs.xyz/tx/",
-  },
-  monad: {
-    name: "Monad",
-    rpc: "https://testnet-rpc.monad.xyz",
-    explorer: "https://explorer.monad.xyz/tx/",
+    supportsTx: false,
   },
   sepolia: {
     name: "Sepolia",
     rpc: "https://rpc.sepolia.org",
     explorer: "https://sepolia.etherscan.io/tx/",
+    supportsTx: true,
   },
 };
 
@@ -58,10 +55,14 @@ export default function Home() {
       const balanceRaw = (await res1.json()).result;
       setBalance((parseInt(balanceRaw, 16) / 1e18).toFixed(6));
 
-      const txRes = await fetch(`/api/txs/${address}`);
-      const txData = await txRes.json();
-      if (txData.result) {
-        setTxs(txData.result.slice(0, 5));
+      if (CHAINS[chain].supportsTx) {
+        const txRes = await fetch(`/api/txs/${address}`);
+        const txData = await txRes.json();
+        if (txData.result) {
+          setTxs(txData.result.slice(0, 5));
+        } else {
+          setTxs([]);
+        }
       } else {
         setTxs([]);
       }
@@ -124,39 +125,45 @@ export default function Home() {
         </div>
       )}
 
-      {txs.length > 0 && (
-        <div className="bg-gray-800 p-4 rounded-xl w-full max-w-xl mt-4 shadow-md">
-          <p className="mb-3 text-pink-300 font-semibold text-base flex items-center gap-2">
-            🧾 Last Transactions
-          </p>
-          <ul className="text-sm space-y-4">
-            {txs.map((tx, i) => (
-              <li key={i} className="border-b border-gray-700 pb-3">
-                <div className="flex justify-between items-center">
-                  <a
-                    href={`${CHAINS[chain].explorer}${tx.hash}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:underline truncate max-w-[70%]"
+      {CHAINS[chain].supportsTx ? (
+        txs.length > 0 && (
+          <div className="bg-gray-800 p-4 rounded-xl w-full max-w-xl mt-4 shadow-md">
+            <p className="mb-3 text-pink-300 font-semibold text-base flex items-center gap-2">
+              🧾 Last Transactions
+            </p>
+            <ul className="text-sm space-y-4">
+              {txs.map((tx, i) => (
+                <li key={i} className="border-b border-gray-700 pb-3">
+                  <div className="flex justify-between items-center">
+                    <a
+                      href={`${CHAINS[chain].explorer}${tx.hash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:underline truncate max-w-[70%]"
+                    >
+                      🔗 {tx.hash.slice(0, 10)}...{tx.hash.slice(-8)}
+                    </a>
+                    <span className="text-xs text-gray-400">{parseFloat(tx.value) / 1e18} ETH</span>
+                  </div>
+                  <div className="text-xs mt-1 text-gray-300">To: {tx.to}</div>
+                  <div className="text-xs text-gray-400">Gas: {tx.gasUsed || "—"}</div>
+                  <span
+                    onClick={() => setInputData({ ...inputData, [tx.hash]: !inputData[tx.hash] })}
+                    className="text-blue-400 cursor-pointer text-xs hover:underline mt-1 inline-block"
                   >
-                    🔗 {tx.hash.slice(0, 10)}...{tx.hash.slice(-8)}
-                  </a>
-                  <span className="text-xs text-gray-400">{parseFloat(tx.value) / 1e18} ETH</span>
-                </div>
-                <div className="text-xs mt-1 text-gray-300">To: {tx.to}</div>
-                <div className="text-xs text-gray-400">Gas: {tx.gasUsed || "—"}</div>
-                <span
-                  onClick={() => setInputData({ ...inputData, [tx.hash]: !inputData[tx.hash] })}
-                  className="text-blue-400 cursor-pointer text-xs hover:underline mt-1 inline-block"
-                >
-                  {inputData[tx.hash] ? "Hide Input" : "View Input"}
-                </span>
-                {inputData[tx.hash] && (
-                  <pre className="bg-gray-900 mt-1 p-2 text-xs rounded break-all whitespace-pre-wrap">{decodeInput(tx.input)}</pre>
-                )}
-              </li>
-            ))}
-          </ul>
+                    {inputData[tx.hash] ? "Hide Input" : "View Input"}
+                  </span>
+                  {inputData[tx.hash] && (
+                    <pre className="bg-gray-900 mt-1 p-2 text-xs rounded break-all whitespace-pre-wrap">{decodeInput(tx.input)}</pre>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      ) : (
+        <div className="bg-gray-800 p-4 rounded-xl w-full max-w-xl mt-4 shadow-md text-center text-sm text-gray-400">
+          🚧 TX history is not available for Rise Testnet (no explorer API yet).
         </div>
       )}
 
