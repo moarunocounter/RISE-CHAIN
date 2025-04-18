@@ -40,12 +40,14 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#0e0f11] text-white">
-      <div className="flex flex-col items-center justify-center space-y-4 w-full max-w-md">
-        <h1 className="text-4xl font-bold text-blue-400 text-center">🌐 Rise Explorer v.0</h1>
+    <main className="min-h-screen flex items-center justify-center bg-[#0e0f11] text-white p-6">
+      <div className="w-full max-w-md flex flex-col items-center space-y-6">
+        <h1 className="text-4xl font-bold text-blue-400 text-center">
+          🌐 Rise Explorer v.0
+        </h1>
 
         <select
-          className="w-[300px] px-4 py-2 rounded-md bg-gray-800 text-white"
+          className="w-full px-4 py-3 rounded bg-gray-800 text-white"
           value={chain}
           onChange={(e) => setChain(e.target.value)}
         >
@@ -57,12 +59,13 @@ export default function Home() {
           value={address}
           onChange={(e) => setAddress(e.target.value)}
           placeholder="Enter wallet address"
-          className="w-[300px] px-4 py-2 rounded-md bg-gray-800 text-white"
+          className="w-full px-4 py-3 rounded bg-gray-800 text-white"
         />
 
         <button
           onClick={fetchWalletData}
-          className="w-[300px] bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition"
+          disabled={loading}
+          className="w-full px-4 py-3 rounded bg-blue-600 hover:bg-blue-700 transition"
         >
           🔍 {loading ? "Loading..." : "Get Info"}
         </button>
@@ -72,12 +75,13 @@ export default function Home() {
         )}
 
         {balance && (
-          <div className="w-[300px] p-4 bg-gray-800 rounded text-center">
-            💰 <span className="font-bold">Balance:</span> {balance} ETH
+          <div className="w-full px-4 py-4 bg-gray-800 rounded text-center text-lg">
+            💰 <span className="font-semibold">Balance:</span>{" "}
+            <span className="text-green-400">{balance} ETH</span>
           </div>
         )}
 
-        <p className="text-center text-gray-500 text-sm pt-4">
+        <p className="text-gray-500 text-sm pt-4 text-center">
           Built by Moaru • Testnet only
         </p>
       </div>
