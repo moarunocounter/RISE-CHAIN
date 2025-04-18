@@ -1,24 +1,22 @@
-// lib/abiDecoder.ts
 import { Interface } from "ethers";
 
-const iface = new Interface([
-  "function transfer(address to, uint256 amount)",
-  "function approve(address spender, uint256 amount)",
-  "function swapExactETHForTokens(uint amountOutMin, address[] path, address to, uint deadline)",
-  "function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] path, address to, uint deadline)",
-]);
-
-export function decodeInputData(data: string) {
+export function decodeTx(abi: any[], input: string) {
   try {
-    const parsed = iface.parseTransaction({ data });
+    const iface = new Interface(abi);
+    const parsed = iface.parseTransaction({ data: input });
+
+    const args = parsed.args.map((arg, i) => ({
+      name: iface.getFunction(parsed.name).inputs[i].name,
+      value: Array.isArray(arg) ? JSON.stringify(arg) : arg.toString(),
+    }));
+
     return {
       name: parsed.name,
-      args: parsed.args.map((arg, i) => ({
-        name: parsed.functionFragment.inputs[i].name,
-        value: Array.isArray(arg) ? JSON.stringify(arg) : arg.toString(),
-      })),
+      args,
     };
-  } catch {
+  } catch (err) {
+    console.error("Failed to decode tx", err);
     return null;
   }
 }
+
