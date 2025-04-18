@@ -1,6 +1,6 @@
-// app/tx/[hash]/page.tsx
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 
 async function getTx(hash: string) {
   const rpc = "https://testnet.riselabs.xyz";
@@ -64,6 +64,22 @@ export default async function TxPage({ params }: { params: { hash: string } }) {
             <span className="text-gray-400">Block</span>
             <span className="text-white font-mono">{parseInt(tx.blockNumber, 16)}</span>
           </div>
+        </div>
+
+        <div className="flex justify-center gap-3">
+          <button
+            onClick={() => navigator.clipboard.writeText(hash)}
+            className="text-xs bg-gray-700 px-3 py-1 rounded-md hover:bg-gray-600"
+          >
+            📋 Copy Hash
+          </button>
+          <a
+            href={`https://explorer.testnet.riselabs.xyz/tx/${hash}`}
+            target="_blank"
+            className="text-xs bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-md"
+          >
+            🔗 Share <ArrowUpRight className="inline-block ml-1 w-3 h-3" />
+          </a>
         </div>
 
         <Link
