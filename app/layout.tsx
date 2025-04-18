@@ -3,15 +3,13 @@ import { ReactNode } from "react";
 
 export const metadata = {
   title: "Rise Explorer",
-  description: "Mini wallet explorer for Rise Testnet",
+  description: "Simple wallet and tx explorer for Rise chain",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className="bg-[#0e0f11] text-white min-h-screen">
-        {children}
-      </body>
+      <body className="bg-[#0e0f11] text-white">{children}</body>
     </html>
   );
 }
