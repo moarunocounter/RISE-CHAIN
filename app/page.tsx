@@ -1,7 +1,8 @@
-// Rise Explorer v.0 - Polished UI with Tailwind + Interactive Enhancements
+// Rise Testnet Explorer v.0 - Polished UI with Tailwind + Interactive Enhancements
 "use client";
 
 import { useEffect, useState } from "react";
+import Head from "next/head";
 
 export default function Home() {
   const [address, setAddress] = useState("");
@@ -15,7 +16,6 @@ export default function Home() {
     setLoading(true);
     setError(null);
     try {
-      // ✅ Get balance via Rise RPC
       const res = await fetch("https://testnet.riselabs.xyz", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -28,12 +28,11 @@ export default function Home() {
       });
       const data = await res.json();
       if (data.result) {
-        setBalance((parseInt(data.result, 16) / 1e18).toFixed(4));
+        setBalance((parseInt(data.result, 16) / 1e18).toFixed(6));
       } else {
         setError("Balance not found");
       }
 
-      // ⛔ TX list masih dari Etherscan (RPC Rise belum support)
       const txRes = await fetch(
         `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&sort=desc&apikey=R4N6DU9VV81266478YYPWNGVXVMUWQGE39`
       );
@@ -51,6 +50,15 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-black to-gray-900 text-white flex flex-col items-center p-6 font-mono">
+      <Head>
+        <title>Rise Explorer v.0</title>
+        <meta name="description" content="Check your wallet balance & tx on Rise testnet." />
+        <meta property="og:title" content="Rise Explorer v.0" />
+        <meta property="og:description" content="Explore wallet info on Rise testnet." />
+        <meta property="og:type" content="website" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+
       <h1 className="text-4xl font-extrabold mb-4 text-pink-400 flex items-center gap-2">
         <span>🚀</span> Rise Explorer v.0
       </h1>
