@@ -1,4 +1,3 @@
-// Rise Testnet Explorer v.0 - Polished UI with Tailwind + Interactive Enhancements
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,6 +6,8 @@ import Head from "next/head";
 export default function Home() {
   const [address, setAddress] = useState("");
   const [balance, setBalance] = useState(null);
+  const [nonce, setNonce] = useState(null);
+  const [code, setCode] = useState(null);
   const [txs, setTxs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -16,22 +17,27 @@ export default function Home() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("https://testnet.riselabs.xyz", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          method: "eth_getBalance",
-          params: [address, "latest"],
-          id: 1,
-        }),
-      });
-      const data = await res.json();
-      if (data.result) {
-        setBalance((parseInt(data.result, 16) / 1e18).toFixed(6));
-      } else {
-        setError("Balance not found");
-      }
+      const rpcUrl = "https://testnet.riselabs.xyz";
+
+      const fetchRPC = async (method, params = []) => {
+        const res = await fetch(rpcUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", method, params, id: 1 }),
+        });
+        const data = await res.json();
+        return data.result;
+      };
+
+      const [rawBalance, rawNonce, rawCode] = await Promise.all([
+        fetchRPC("eth_getBalance", [address, "latest"]),
+        fetchRPC("eth_getTransactionCount", [address, "latest"]),
+        fetchRPC("eth_getCode", [address, "latest"]),
+      ]);
+
+      setBalance((parseInt(rawBalance, 16) / 1e18).toFixed(6));
+      setNonce(parseInt(rawNonce, 16));
+      setCode(rawCode);
 
       const txRes = await fetch(
         `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&sort=desc&apikey=R4N6DU9VV81266478YYPWNGVXVMUWQGE39`
@@ -80,11 +86,17 @@ export default function Home() {
 
       {error && <p className="text-red-400 mt-4">⚠️ {error}</p>}
 
-      {balance && (
-        <div className="bg-gray-800 p-4 rounded-xl w-full max-w-md mt-6 shadow-md">
-          <p className="text-lg">
-            <strong>💰 Balance:</strong> <span className="text-green-400">{balance} ETH</span>
-          </p>
+      {(balance || nonce !== null || code !== null) && (
+        <div className="bg-gray-800 p-4 rounded-xl w-full max-w-md mt-6 shadow-md space-y-2">
+          {balance && (
+            <p><strong>💰 Balance:</strong> <span className="text-green-400">{balance} ETH</span></p>
+          )}
+          {nonce !== null && (
+            <p><strong>📊 Nonce:</strong> {nonce}</p>
+          )}
+          {code !== null && (
+            <p><strong>🧬 Type:</strong> {code === "0x" ? "EOA" : "Smart Contract"}</p>
+          )}
         </div>
       )}
 
