@@ -1,35 +1,64 @@
-<h1 align="center">🔧 rise-toolbox</h1>
-<p align="center">
-  <i>A minimalist sandbox to explore the depths of Rise Chain.</i><br/>
-  <b>Libertas Supra Omnia ⚔️</b>
-</p>
+# 🚀 Rise Explorer v.0
+
+> Minimalist web app to check wallet balance and recent transactions on the **Rise testnet**.
 
 ---
 
-## ✨ Overview
-
-> A solo-builder playground to tinker with Rise Chain’s infrastructure.  
-> Lightweight, fast, and ready for the modular multichain future.
-
-This repo is part of the **Ride with Rise** testnet initiative — focused on early experimentation with:
-
-- ⚡ Real-time block & transaction RPC queries  
-- 🧱 Node interaction & testnet latency tests  
-- 🛠️ Dev-focused tooling for onchain dApps  
-- 🧬 Future plans: CLI utils, indexers, or whatever
+![Next.js](https://img.shields.io/badge/Built%20with-Next.js-blue)
+![TailwindCSS](https://img.shields.io/badge/Styled%20with-TailwindCSS-38BDF8)
+![RPC](https://img.shields.io/badge/Powered%20by-Rise%20RPC-8B5CF6)
+[![Live on Vercel](https://vercelbadge.vercel.app/api/moarunocounter/rise-chain)](https://rise-chain.vercel.app)
 
 ---
 
-## 🌐 Why Rise?
+## 💡 What is this?
 
-Because the current L1s are good.  
-But not fast enough. Not modular enough. Not *Rise* enough.
+A tiny web-based explorer for Rise testnet wallets.  
+Just paste your address and get:
 
-- 🧠 Powered by MoveVM  
-- ⚙️ Modular runtime, scalable infra  
-- 🚀 Sub-100ms latency goal  
-- 🧩 Built for DePIN, RWA, onchain games, real-time social
+- ✅ Current balance (via `https://testnet.riselabs.xyz` RPC)
+- ✅ Last 5 transactions (via Etherscan API)
+
+Built for quick testing, showcasing, and community contribution.
 
 ---
 
-## 📁 Directory (soon™)
+## 🧪 Features
+
+- 🔍 Input any testnet wallet address  
+- ⚡ Instant RPC fetch (native Rise JSON-RPC)  
+- 🧾 Etherscan fallback for TX list  
+- 🎨 Dark UI with Tailwind  
+- 📱 Mobile-responsive
+
+---
+
+## 🛠️ Stack
+
+- [Next.js](https://nextjs.org/) 14+ with App Router  
+- [Tailwind CSS](https://tailwindcss.com/) for styling  
+- Rise JSON-RPC endpoint  
+- Etherscan API for historical tx
+
+---
+
+## ⚙️ Local Setup
+
+```bash
+git clone https://github.com/moarunocounter/RISE-CHAIN.git
+cd RISE-CHAIN
+npm install
+npm run dev
+```
+
+Live at: [https://rise-chain.vercel.app](https://rise-chain.vercel.app)
+
+---
+
+## ✨ Credit
+
+Created by [moarunocounter](https://github.com/moarunocounter)
+
+> Built during the Ride With Rise Testnet 🚴
+
+---
