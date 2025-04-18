@@ -1,6 +1,4 @@
-// app/wallet/[address]/page.tsx
 import { notFound } from "next/navigation";
-import Link from "next/link";
 
 const TOKENS = [
   {
@@ -190,7 +188,7 @@ export default async function WalletPage({ params }: { params: { address: string
           🔗 View on Rise Explorer
         </a>
 
-        {txs.length > 0 && (
+        {txs.length > 0 ? (
           <div className="bg-gray-800 rounded-2xl p-5 shadow">
             <h2 className="text-pink-400 font-semibold text-base mb-3">📄 Recent Transactions</h2>
             <ul className="text-sm space-y-2">
@@ -206,12 +204,24 @@ export default async function WalletPage({ params }: { params: { address: string
                     </a>
                   </div>
                   <div className="text-gray-400 text-xs">
-                    from <span className="text-white">{tx.from.slice(0, 10)}...</span> to <span className="text-white">{tx.to?.slice(0, 10) || "0x0"}...</span>
+                    from <span className="text-white">{tx.from.slice(0, 10)}...</span> to{" "}
+                    <span className="text-white">{tx.to?.slice(0, 10) || "0x0"}...</span>
                   </div>
                 </li>
               ))}
             </ul>
           </div>
+        ) : (
+          <p className="text-sm text-gray-500">
+            No recent transactions found. Try checking on{" "}
+            <a
+              href={`https://explorer.testnet.riselabs.xyz/address/${address}`}
+              className="underline text-blue-400"
+              target="_blank"
+            >
+              Rise Explorer
+            </a>
+          </p>
         )}
       </div>
     </main>
