@@ -1,43 +1,46 @@
 "use client";
 import { useState } from "react";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export default function HomePage() {
+export default function Home() {
   const [address, setAddress] = useState("");
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (address.startsWith("0x") && address.length === 42) {
+  const handleSearch = () => {
+    if (address && address.startsWith("0x")) {
       router.push(`/wallet/${address}`);
-    } else {
-      alert("Invalid address");
     }
   };
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-[#0e0f11] text-white p-6">
       <div className="w-full max-w-md space-y-6 text-center">
-        <h1 className="text-4xl font-bold text-blue-400">🌐 Rise Explorer</h1>
-        <p className="text-gray-400">Enter a wallet address to explore</p>
+        <h1 className="text-4xl font-bold text-blue-400 drop-shadow">
+          🌐 Rise Explorer v.0
+        </h1>
+        <p className="text-sm text-gray-500">Built for Rise Testnet</p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            placeholder="0x..."
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="w-full p-3 rounded bg-gray-800 text-white font-mono"
-          />
-          <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded text-white font-semibold"
-          >
-            🔎 View Wallet
-          </button>
-        </form>
+        <input
+          type="text"
+          placeholder="Enter wallet address (0x...)"
+          className="w-full p-3 bg-gray-800 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+        />
 
-        <p className="text-sm text-gray-500 pt-4">Built by Moaru • Testnet only</p>
+        <button
+          onClick={handleSearch}
+          disabled={!address.startsWith("0x")}
+          className="w-full flex items-center justify-center gap-2 p-3 bg-blue-600 rounded-lg hover:bg-blue-700 transition font-semibold disabled:opacity-50"
+        >
+          🔍 View Wallet <ArrowRight size={18} />
+        </button>
+
+        <p className="text-xs text-gray-500 pt-6">
+          Made by <Link href="https://github.com/moarunocounter" className="underline">moaru</Link>
+        </p>
       </div>
     </main>
   );
