@@ -1,4 +1,4 @@
-// Rise Explorer v.0 - Next.js (App Router + Tailwind)
+// Wallet Intel Lite - Next.js (App Router + Tailwind)
 // MVP: Input address → fetch balance + last tx + basic RPC info
 
 "use client";
@@ -11,8 +11,6 @@ export default function Home() {
   const [txs, setTxs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  const providerUrl = "https://ethereum-sepolia.publicnode.com";
 
   const fetchWalletData = async () => {
     if (!address) return;
@@ -75,11 +73,11 @@ export default function Home() {
         <div className="bg-gray-800 p-4 rounded-xl w-full max-w-md">
           <p className="mb-2 font-semibold">📑 Last Transactions</p>
           <ul className="text-sm space-y-1">
-            {txs.map((tx) => (
-              <li key={tx.hash} className="truncate">
+            {txs.map((tx, index) => (
+              <li key={tx.hash || index} className="truncate">
                 {tx?.from?.toLowerCase?.() === address?.toLowerCase?.()
                   ? "→ Sent"
-                  : "← Received"} {parseFloat(tx.value || 0) / 1e18} ETH
+                  : "← Received"} {tx?.value ? (parseFloat(tx.value) / 1e18).toFixed(4) : "0"} ETH
               </li>
             ))}
           </ul>
@@ -88,4 +86,3 @@ export default function Home() {
     </main>
   );
 }
-
