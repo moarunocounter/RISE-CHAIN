@@ -6,7 +6,7 @@ export function decodeTx(abi: any[], input: string) {
     const parsed = iface.parseTransaction({ data: input });
 
     const args = parsed.args.map((arg, i) => ({
-      name: iface.getFunction(parsed.name).inputs[i].name,
+      name: parsed.fragment.inputs[i].name,
       value: Array.isArray(arg) ? JSON.stringify(arg) : arg.toString(),
     }));
 
@@ -19,4 +19,3 @@ export function decodeTx(abi: any[], input: string) {
     return null;
   }
 }
-
