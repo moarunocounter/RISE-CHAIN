@@ -1,7 +1,10 @@
 // app/tx/[hash]/page.tsx
+'use client';
+
 import { notFound } from "next/navigation";
 import { decodeInputData } from "@/lib/abiDecoder";
 import { decodeLogs } from "@/lib/logDecoder";
+import { useState } from "react";
 
 async function getTx(hash: string) {
   const rpc = "https://testnet.riselabs.xyz";
@@ -44,6 +47,15 @@ export default async function TxPage({ params }: { params: { hash: string } }) {
 
   const decoded = decodeInputData(tx.input);
   const logs = decodeLogs(receipt.logs);
+  const shareUrl = `https://rise-explorer.vercel.app/tx/${tx.hash}`;
+
+  const [copied, setCopied] = useState<string | null>(null);
+
+  const handleCopy = async (text: string, label: string) => {
+    await navigator.clipboard.writeText(text);
+    setCopied(label);
+    setTimeout(() => setCopied(null), 1500);
+  };
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-[#0e0f11] text-white p-6">
@@ -51,12 +63,34 @@ export default async function TxPage({ params }: { params: { hash: string } }) {
         <h1 className="text-2xl font-bold text-blue-400">📦 Transaction Details</h1>
 
         <div className="bg-gray-800 p-4 rounded shadow space-y-3 text-sm font-mono">
-          <p><span className="text-gray-400">Hash:</span> {tx.hash}</p>
+          <div className="flex items-center justify-between">
+            <p><span className="text-gray-400">Hash:</span> {tx.hash}</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleCopy(tx.hash, "Hash copied!")}
+                className="text-xs bg-gray-700 px-2 py-1 rounded hover:bg-gray-600"
+              >
+                📋 Copy
+              </button>
+              <button
+                onClick={() => handleCopy(shareUrl, "Link copied!")}
+                className="text-xs bg-gray-700 px-2 py-1 rounded hover:bg-gray-600"
+              >
+                🔗 Share
+              </button>
+            </div>
+          </div>
+          {copied && (
+            <p className="text-green-400 text-xs text-right">✅ {copied}</p>
+          )}
+          <p><span className="text-gray-400">Status:</span> {receipt.status === "0x1" ? "✅ Success" : "❌ Failed"}</p>
           <p><span className="text-gray-400">From:</span> {tx.from}</p>
           <p><span className="text-gray-400">To:</span> {tx.to}</p>
           <p><span className="text-gray-400">Value:</span> {parseInt(tx.value, 16) / 1e18} ETH</p>
-          <p><span className="text-gray-400">Nonce:</span> {parseInt(tx.nonce)}</p>
           <p><span className="text-gray-400">Gas Price:</span> {parseInt(tx.gasPrice, 16) / 1e9} Gwei</p>
+          <p><span className="text-gray-400">Gas Used:</span> {parseInt(receipt.gasUsed, 16)}</p>
+          <p><span className="text-gray-400">Block:</span> {parseInt(receipt.blockNumber, 16)}</p>
+          <p><span className="text-gray-400">Tx Index:</span> {parseInt(receipt.transactionIndex, 16)}</p>
 
           {decoded ? (
             <div>
