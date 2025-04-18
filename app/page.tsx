@@ -1,16 +1,20 @@
 "use client";
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const [address, setAddress] = useState("");
+  const [input, setInput] = useState("");
   const router = useRouter();
 
   const handleSearch = () => {
-    if (address && address.startsWith("0x")) {
-      router.push(`/wallet/${address}`);
+    const trimmed = input.trim();
+    if (!trimmed.startsWith("0x")) return;
+
+    if (trimmed.length === 42) {
+      router.push(`/wallet/${trimmed}`);
+    } else if (trimmed.length === 66) {
+      router.push(`/tx/${trimmed}`);
     }
   };
 
@@ -20,27 +24,23 @@ export default function Home() {
         <h1 className="text-4xl font-bold text-blue-400 drop-shadow">
           🌐 Rise Explorer v.0
         </h1>
-        <p className="text-sm text-gray-500">Built for Rise Testnet</p>
+        <p className="text-sm text-gray-500">Enter wallet or TX hash</p>
 
         <input
           type="text"
-          placeholder="Enter wallet address (0x...)"
+          placeholder="Paste 0x wallet or transaction hash"
           className="w-full p-3 bg-gray-800 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
         />
 
         <button
           onClick={handleSearch}
-          disabled={!address.startsWith("0x")}
+          disabled={!input.startsWith("0x")}
           className="w-full flex items-center justify-center gap-2 p-3 bg-blue-600 rounded-lg hover:bg-blue-700 transition font-semibold disabled:opacity-50"
         >
-          🔍 View Wallet <ArrowRight size={18} />
+          🔍 Explore <ArrowRight size={18} />
         </button>
-
-        <p className="text-xs text-gray-500 pt-6">
-          Made by <Link href="https://github.com/moarunocounter" className="underline">moaru</Link>
-        </p>
       </div>
     </main>
   );
