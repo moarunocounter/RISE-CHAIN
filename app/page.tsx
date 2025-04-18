@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { ArrowRight } from "lucide-react";
 
 export default function Home() {
   const [address, setAddress] = useState("");
@@ -34,7 +33,7 @@ export default function Home() {
       setBalance(eth.toFixed(6));
     } catch (err) {
       console.error(err);
-      setError("Failed to fetch data");
+      setError("⚠️ Failed to fetch data");
     }
 
     setLoading(false);
@@ -42,13 +41,11 @@ export default function Home() {
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#0e0f11] text-white">
-      <div className="w-full max-w-xl space-y-6">
-        <h1 className="text-4xl font-bold text-center text-blue-400 flex items-center justify-center gap-2">
-          🌐 Rise Explorer v.0
-        </h1>
+      <div className="flex flex-col items-center justify-center space-y-4 w-full max-w-md">
+        <h1 className="text-4xl font-bold text-blue-400 text-center">🌐 Rise Explorer v.0</h1>
 
         <select
-          className="w-full bg-gray-800 text-white p-2 rounded"
+          className="w-[300px] px-4 py-2 rounded-md bg-gray-800 text-white"
           value={chain}
           onChange={(e) => setChain(e.target.value)}
         >
@@ -57,36 +54,28 @@ export default function Home() {
 
         <input
           type="text"
-          placeholder="0x..."
-          className="w-full p-2 bg-gray-800 rounded"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
+          placeholder="Enter wallet address"
+          className="w-[300px] px-4 py-2 rounded-md bg-gray-800 text-white"
         />
 
         <button
-          className="w-full p-3 bg-blue-600 rounded hover:bg-blue-700 transition"
           onClick={fetchWalletData}
-          disabled={loading}
+          className="w-[300px] bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition"
         >
           🔍 {loading ? "Loading..." : "Get Info"}
         </button>
 
         {error && (
-          <div className="p-3 bg-red-800 text-red-200 rounded">
-            ⚠️ {error}
-          </div>
+          <p className="text-red-400 text-sm text-center">{error}</p>
         )}
 
         {balance && (
-          <div className="p-4 bg-gray-800 rounded text-center text-lg font-mono">
-            💰 <strong>Balance:</strong>{" "}
-            <span className="text-green-400">{balance} ETH</span>
+          <div className="w-[300px] p-4 bg-gray-800 rounded text-center">
+            💰 <span className="font-bold">Balance:</span> {balance} ETH
           </div>
         )}
-
-        <div className="p-4 bg-gray-800 rounded text-center text-sm text-yellow-400">
-          🪄 TX history is not available for Rise Testnet (no explorer API yet).
-        </div>
 
         <p className="text-center text-gray-500 text-sm pt-4">
           Built by Moaru • Testnet only
