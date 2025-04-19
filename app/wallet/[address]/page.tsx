@@ -1,229 +1,158 @@
+// app/token/[address]/page.tsx
 "use client";
-
 import { notFound } from "next/navigation";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
-const TOKENS = [
-  {
-    name: "USDC",
-    symbol: "USDC",
-    address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-    decimals: 6,
-    logo: "https://cryptologos.cc/logos/usd-coin-usdc-logo.png?v=026",
-  },
-];
+const RPC = "https://testnet.riselabs.xyz";
 
-async function getBalance(address: string) {
-  const rpc = "https://testnet.riselabs.xyz";
+async function fetchTotalSupply(address: string): Promise<string> {
   const body = {
     jsonrpc: "2.0",
-    method: "eth_getBalance",
-    params: [address, "latest"],
+    method: "eth_call",
+    params: [
+      {
+        to: address,
+        data: "0x18160ddd", // totalSupply()
+      },
+      "latest",
+    ],
     id: 1,
   };
 
   try {
-    const res = await fetch(rpc, {
+    const res = await fetch(RPC, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
-      cache: "no-store",
     });
-    const result = await res.json();
-    if (result?.result) {
-      return parseFloat((parseInt(result.result, 16) / 1e18).toFixed(6));
+    const json = await res.json();
+    const raw = json.result;
+    if (raw && raw !== "0x") {
+      const supply = parseInt(raw, 16);
+      return supply.toLocaleString();
     }
-    return null;
-  } catch {
-    return null;
+  } catch (err) {
+    console.error("Failed to fetch supply", err);
   }
+  return "Unavailable";
 }
 
-async function getRecentTxs(address: string) {
-  const rpc = "https://testnet.riselabs.xyz";
-  const txs: any[] = [];
+function decodeAddress(topic: string): string {
+  return "0x" + topic.slice(-40);
+}
+
+async function fetchRecentTransfers(address: string): Promise<any[]> {
+  const transferTopic = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"; // Transfer()
+  const body = {
+    jsonrpc: "2.0",
+    method: "eth_getLogs",
+    params: [
+      {
+        fromBlock: "0x0",
+        toBlock: "latest",
+        address,
+        topics: [transferTopic],
+      },
+    ],
+    id: 1,
+  };
 
   try {
-    const latestBlockHex = await fetch(rpc, {
+    const res = await fetch(RPC, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        method: "eth_blockNumber",
-        params: [],
-        id: 1,
-      }),
+      body: JSON.stringify(body),
     });
-
-    const latest = parseInt((await latestBlockHex.json()).result, 16);
-
-    for (let i = 0; i < 5; i++) {
-      const hex = "0x" + (latest - i).toString(16);
-      const res = await fetch(rpc, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          method: "eth_getBlockByNumber",
-          params: [hex, true],
-          id: 1,
-        }),
-      });
-
-      const block = (await res.json()).result;
-      if (block?.transactions) {
-        txs.push(
-          ...block.transactions.filter(
-            (tx: any) =>
-              tx.from.toLowerCase() === address.toLowerCase() ||
-              tx.to?.toLowerCase() === address.toLowerCase()
-          )
-        );
-      }
-    }
-
-    return txs;
-  } catch {
-    return [];
+    const json = await res.json();
+    const logs = json.result;
+    const holders = new Set<string>();
+    const decodedLogs = logs.slice(-10).map((log: any) => {
+      const from = decodeAddress(log.topics[1]);
+      const to = decodeAddress(log.topics[2]);
+      holders.add(to);
+      return {
+        hash: log.transactionHash,
+        from,
+        to,
+      };
+    });
+    return [decodedLogs, holders.size];
+  } catch (err) {
+    console.error("Failed to fetch logs", err);
+    return [[], 0];
   }
 }
 
-async function getTokenHoldings(address: string) {
-  const rpc = "https://testnet.riselabs.xyz";
-  const results = [];
-
-  for (const token of TOKENS) {
-    const data = "0x70a08231" + address.replace("0x", "").padStart(64, "0");
-
-    const body = {
-      jsonrpc: "2.0",
-      method: "eth_call",
-      params: [
-        {
-          to: token.address,
-          data,
-        },
-        "latest",
-      ],
-      id: 1,
-    };
-
-    try {
-      const res = await fetch(rpc, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-        cache: "no-store",
-      });
-      const json = await res.json();
-      const raw = json.result;
-      if (raw && raw !== "0x") {
-        const amount = parseInt(raw, 16) / 10 ** token.decimals;
-        if (amount > 0) {
-          results.push({ ...token, amount });
-        }
-      }
-    } catch (err) {
-      console.error("token fetch fail", token.symbol);
-    }
-  }
-
-  return results;
-}
-
-export default async function WalletPage({ params }: { params: { address: string } }) {
+export default function TokenDetailPage({ params }: { params: { address: string } }) {
   const { address } = params;
   if (!address || !address.startsWith("0x")) return notFound();
 
-  const [balance, txs, tokens] = await Promise.all([
-    getBalance(address),
-    getRecentTxs(address),
-    getTokenHoldings(address),
-  ]);
+  const [supply, setSupply] = useState("Loading...");
+  const [logs, setLogs] = useState<any[]>([]);
+  const [holders, setHolders] = useState(0);
+
+  useEffect(() => {
+    fetchTotalSupply(address).then(setSupply);
+    fetchRecentTransfers(address).then(([logList, holderCount]) => {
+      setLogs(logList);
+      setHolders(holderCount);
+    });
+  }, [address]);
+
+  const MOCK = {
+    name: "TestUSDC",
+    symbol: "USDC",
+    logo: "https://cryptologos.cc/logos/usd-coin-usdc-logo.png?v=026",
+  };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#0e0f11] text-white p-6">
-      <div className="w-full max-w-md space-y-6 text-center">
-        <h1 className="text-3xl font-bold text-blue-400 drop-shadow">💳 Wallet Overview</h1>
-
-        <div className="flex items-center justify-center gap-2">
-          <span className="text-xs text-gray-400 break-all font-mono">{address}</span>
-          <button
-            onClick={() => navigator.clipboard.writeText(address)}
-            className="text-xs text-blue-400 hover:underline"
-          >
-            copy
-          </button>
-        </div>
-
-        <div className="bg-gray-800 rounded-2xl p-5 shadow-md space-y-3">
-          <span className="text-xs px-2 py-1 bg-blue-600 rounded-full uppercase tracking-wider">Rise Testnet</span>
-          <p className="text-sm">
-            <span className="text-gray-400">Balance:</span>{" "}
-            <span className="text-green-400 font-mono">
-              {balance !== null ? `${balance} ETH` : "Unavailable"}
-            </span>
-          </p>
-        </div>
-
-        {tokens.length > 0 && (
-          <div className="bg-gray-800 rounded-2xl p-5 shadow space-y-2">
-            <h2 className="text-yellow-300 font-semibold text-base mb-2">🏦 Token Holdings</h2>
-            <ul className="text-sm space-y-2">
-              {tokens.map((t, i) => (
-                <li key={i} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <img src={t.logo} alt={t.symbol} className="w-5 h-5 rounded-full" />
-                    <span className="text-white font-semibold">{t.symbol}</span>
-                  </div>
-                  <span className="text-green-400 font-mono">{t.amount}</span>
-                </li>
-              ))}
-            </ul>
+    <main className="min-h-screen bg-[#0e0f11] text-white p-6">
+      <div className="max-w-xl mx-auto space-y-6 text-center">
+        <h1 className="text-3xl font-bold text-blue-400">🔍 Token Detail</h1>
+        <div className="flex items-center justify-center gap-4">
+          <Image src={MOCK.logo} alt={MOCK.symbol} width={48} height={48} className="rounded-full" />
+          <div>
+            <div className="text-xl font-semibold">{MOCK.name} ({MOCK.symbol})</div>
+            <div className="text-xs text-gray-400 flex items-center justify-center gap-2">
+              {address}
+              <button
+                className="text-blue-400 hover:underline text-xs"
+                onClick={() => navigator.clipboard.writeText(address)}
+              >
+                copy
+              </button>
+            </div>
           </div>
-        )}
+        </div>
 
-        <a
-          href={`https://explorer.testnet.riselabs.xyz/address/${address}`}
-          target="_blank"
-          className="text-blue-500 hover:underline text-sm"
-        >
-          🔗 View on Rise Explorer
-        </a>
+        <div className="bg-gray-800 rounded-2xl p-4 space-y-3 shadow">
+          <p><span className="text-gray-400">Total Supply:</span> {supply}</p>
+          <p><span className="text-gray-400">Holders:</span> {holders.toLocaleString()}</p>
+          <p><span className="text-gray-400">Recent Transfers:</span> {logs.length}</p>
+        </div>
 
-        {txs.length > 0 ? (
-          <div className="bg-gray-800 rounded-2xl p-5 shadow">
-            <h2 className="text-pink-400 font-semibold text-base mb-3">📄 Recent Transactions</h2>
-            <ul className="text-sm space-y-2">
-              {txs.map((tx, i) => (
-                <li key={i} className="border-b border-gray-700 pb-2">
-                  <div className="text-blue-400 font-mono truncate">
-                    <a
-                      href={`https://explorer.testnet.riselabs.xyz/tx/${tx.hash}`}
-                      target="_blank"
-                      className="hover:underline"
-                    >
-                      {tx.hash.slice(0, 10)}...{tx.hash.slice(-6)}
-                    </a>
-                  </div>
-                  <div className="text-gray-400 text-xs">
-                    from <span className="text-white">{tx.from.slice(0, 10)}...</span> to{" "}
-                    <span className="text-white">{tx.to?.slice(0, 10) || "0x0"}...</span>
+        {logs.length > 0 && (
+          <div className="bg-gray-900 rounded-2xl p-4 mt-6 text-left">
+            <h2 className="text-pink-400 text-base font-semibold mb-2">📄 Last Transfers</h2>
+            <ul className="space-y-2 text-sm">
+              {logs.map((tx, i) => (
+                <li key={i} className="border-b border-gray-800 pb-2">
+                  <div className="text-xs text-gray-400">Tx Hash:</div>
+                  <a
+                    href={`https://explorer.testnet.riselabs.xyz/tx/${tx.hash}`}
+                    target="_blank"
+                    className="text-blue-400 hover:underline break-all"
+                  >
+                    {tx.hash}
+                  </a>
+                  <div className="text-gray-400 text-xs mt-1">
+                    from <span className="text-white">{tx.from.slice(0, 10)}...</span> to <span className="text-white">{tx.to.slice(0, 10)}...</span>
                   </div>
                 </li>
               ))}
             </ul>
           </div>
-        ) : (
-          <p className="text-sm text-gray-500">
-            No recent transactions found. Try checking on{" "}
-            <a
-              href={`https://explorer.testnet.riselabs.xyz/address/${address}`}
-              className="underline text-blue-400"
-              target="_blank"
-            >
-              Rise Explorer
-            </a>
-          </p>
         )}
       </div>
     </main>
