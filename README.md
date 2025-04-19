@@ -1,48 +1,39 @@
-# 🚀 Rise Explorer v.0
+# 🌐 Rise Explorer v.0
 
-> Minimalist web app to check wallet balance and recent transactions on the **Rise testnet**.
+A minimal, fast, and fully onchain explorer built for the [Rise Chain](https://risechain.com) testnet.  
+Live RPC querying, no backend, fully open source.
 
----
-
-![Next.js](https://img.shields.io/badge/Built%20with-Next.js-blue)
-![TailwindCSS](https://img.shields.io/badge/Styled%20with-TailwindCSS-38BDF8)
-![RPC](https://img.shields.io/badge/Powered%20by-Rise%20RPC-8B5CF6)
-[![Live on Vercel](https://vercelbadge.vercel.app/api/moarunocounter/rise-chain)](https://rise-chain.vercel.app)
+> ⚠️ This is an early prototype. Built for the **Ride with Rise** campaign.
 
 ---
 
-## 💡 What is this?
+## ✨ Features
 
-A tiny web-based explorer for Rise testnet wallets.  
-Just paste your address and get:
+- 🧠 Wallet Intelligence  
+  See balances, token holdings, and recent transactions.
 
-- ✅ Current balance (via `https://testnet.riselabs.xyz` RPC)
-- ✅ Last 5 transactions (via Etherscan API)
+- 🔎 Transaction Decoder  
+  View decoded transaction details with ABI support (experimental).
 
-Built for quick testing, showcasing, and community contribution.
+- 💳 Token Detail  
+  Check supply, holders, and latest transfers.
 
----
-
-## 🧪 Features
-
-- 🔍 Input any testnet wallet address  
-- ⚡ Instant RPC fetch (native Rise JSON-RPC)  
-- 🧾 Etherscan fallback for TX list  
-- 🎨 Dark UI with Tailwind  
-- 📱 Mobile-responsive
+- 🧪 RPC Powered  
+  Reads directly from `https://testnet.riselabs.xyz`.
 
 ---
 
-## 🛠️ Stack
+## 📦 Stack
 
-- [Next.js](https://nextjs.org/) 14+ with App Router  
-- [Tailwind CSS](https://tailwindcss.com/) for styling  
-- Rise JSON-RPC endpoint  
-- Etherscan API for historical tx
+- 🧬 Next.js 14
+- 🎨 TailwindCSS
+- ⚛️ React 18
+- 🛠️ ethers.js
+- 🚀 Deployed via Vercel
 
 ---
 
-## ⚙️ Local Setup
+## 🚀 Getting Started
 
 ```bash
 git clone https://github.com/moarunocounter/RISE-CHAIN.git
@@ -50,12 +41,6 @@ cd RISE-CHAIN
 npm install
 npm run dev
 ```
-
-Live at: [https://rise-chain.vercel.app](https://rise-chain.vercel.app)
-
----
-
-## ✨ Credit
 
 Created by [moarunocounter](https://github.com/moarunocounter)
 
