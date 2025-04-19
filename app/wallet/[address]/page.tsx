@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import CopyButton from "@/components/CopyButton";
 
 async function getBalance(address: string) {
   const rpc = "https://testnet.riselabs.xyz";
@@ -39,13 +40,7 @@ export default async function WalletPage({ params }: { params: { address: string
 
         <div className="flex items-center justify-center gap-2">
           <span className="text-xs text-gray-400 break-all font-mono">{address}</span>
-          <button
-            type="button"
-            onClick={() => navigator.clipboard.writeText(address)}
-            className="text-xs text-blue-400 hover:underline"
-          >
-            copy
-          </button>
+          <CopyButton text={address} />
         </div>
 
         <div className="bg-gray-800 rounded-2xl p-5 shadow-md space-y-3">
