@@ -39,21 +39,13 @@ export default async function WalletPage({ params }: { params: { address: string
 
         <div className="flex items-center justify-center gap-2">
           <span className="text-xs text-gray-400 break-all font-mono">{address}</span>
-          <form
-            action="#"
-            onSubmit={(e) => {
-              'use server';
-              e.preventDefault();
-            }}
+          <button
+            type="button"
+            onClick={() => navigator.clipboard.writeText(address)}
+            className="text-xs text-blue-400 hover:underline"
           >
-            <button
-              type="button"
-              onClick={() => navigator.clipboard.writeText(address)}
-              className="text-xs text-blue-400 hover:underline"
-            >
-              copy
-            </button>
-          </form>
+            copy
+          </button>
         </div>
 
         <div className="bg-gray-800 rounded-2xl p-5 shadow-md space-y-3">
